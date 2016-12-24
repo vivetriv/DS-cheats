@@ -13,6 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Fig 1: Data type cheat table
 
+Summary:
+* tidyverse is great.
+* `select()` : 
+* `%>%` : 
+* `rename` :
+* `filter()` :
+* 
+
 ```{r }
 
 ```
