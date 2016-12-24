@@ -10,7 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ![Fig 1: Data type cheat sheet](fig_1.png)
-Fig 1: Data type cheat sheet
+
+Fig 1: Data type cheat table
 
 ```{r }
 

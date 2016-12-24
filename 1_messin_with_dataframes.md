@@ -5,6 +5,8 @@ Vivek Trivedi
 
 ![Fig 1: Data type cheat sheet](fig_1.png)
 
+Fig 1: Data type cheat sheet
+
 Title
 -----
 
