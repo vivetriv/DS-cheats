@@ -9,7 +9,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-![Fig 1: Data type cheat sheet](fig_1.png)
+![Fig 1: Data type cheat sheet](pathtofig.png)
 
 Fig 1: Data type cheat table
 

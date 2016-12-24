@@ -3,9 +3,11 @@
 Vivek Trivedi
 24 December 2016
 
-![Fig 1: Data type cheat sheet](fig_1.png)
+![Fig 1: Data type cheat sheet](pathtofig.png)
 
-Fig 1: Data type cheat sheet
+Fig 1: Data type cheat table
+
+Summary: \* tidyverse is great. \* `select()` : \* `%>%` : \* `rename` : \* `filter()` : \*
 
 Title
 -----
