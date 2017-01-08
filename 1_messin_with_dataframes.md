@@ -21,10 +21,22 @@ Summary:
 -   `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 -   `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
 -   `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables.
--   `mutate(df, )` :
+-   `mutate(df, new var/col = func)` : defines and inserts new column into the dataframe.
+-   Percentages and relative quantities hold much more meaning to humans than simply raw numbers.
+-   `rep(thing, x)` : Replicates (repeats) thing x times.
+-   Example:
+
+``` r
+ctib <- my_gap %>%
+  filter(country == "Canada")
+my_gap <- my_gap %>%
+  mutate(tmp = rep(ctib$gdpPercap, nlevels(country)),
+         gdpPercapRel = gdpPercap / tmp,
+         tmp = NULL)
+```
+
+-   Put `eval = False` to display code chunks that do not need output or throw errors.
 
 bla <http://rmarkdown.rstudio.com>.
 
 **bold** *italics*
-
-![](1_messin_with_dataframes_files/figure-markdown_github/pressure-1.png)
