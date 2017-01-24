@@ -29,7 +29,7 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
   	xlab="year", ylab="GDP Per Capita", ylim=c(0,57000)) ## g being a copy of the gapminder dataset.
 ```
 
-* `%>%` : pipe operator. Think "then". Plugs the first preceding R object into the first argument of a function succeeding it (usually on a different line).
+* `%>%` : pipe operator. Think "then". Plugs the first/preceding R object into the first argument of a function succeeding it (usually on a different line).
 * `rename(df, NewColName = old_col_name)` : Rename columns. 
 * `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 * `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
@@ -51,7 +51,9 @@ my_gap <- my_gap %>%
 * Put `eval = False` to display code chunks that do not need output or throw errors without cause.
 * `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 * Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.
-
+* `table(col/var)` : Builds a table with frequency of each observations for the specified column.
+* `group_by(col/var)` : Same as `table()`, with the added convenience of giving the 
+* `n_distinct(col/var)` : 
 
 bla
 <http://rmarkdown.rstudio.com>.

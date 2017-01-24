@@ -25,7 +25,7 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 
 ![](1_messin_with_dataframes_files/figure-markdown_github/boxplot-1.png)
 
--   `%>%` : pipe operator. Think "then". Plugs the first preceding R object into the first argument of a function succeeding it (usually on a different line).
+-   `%>%` : pipe operator. Think "then". Plugs the first/preceding R object into the first argument of a function succeeding it (usually on a different line).
 -   `rename(df, NewColName = old_col_name)` : Rename columns.
 -   `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 -   `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
