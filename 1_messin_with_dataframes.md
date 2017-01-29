@@ -99,7 +99,10 @@ as_tibble(a_rel)
 RelLatest <- a_rel %>%
   filter(year == "2007")
 
-hist(RelLatest$gdpPercapRel)
+hist(RelLatest$gdpPercapRel, main = "Distribution of GDP Per Capita relative to Australia in 2007", 
+     xlab = "GDP Per Capita relative to Australia", 
+     ylab = "Number of countries", 
+     breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5))
 ```
 
 ![](1_messin_with_dataframes_files/figure-markdown_github/hist_07-1.png)
