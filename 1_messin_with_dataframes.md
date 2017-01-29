@@ -1,7 +1,7 @@
 1.  Messin' with dataframes
 ================
 Vivek Trivedi
-24 December 2016
+29 January 2017
 
 ![Fig 1: R object type cheat sheet](fig_1.PNG)
 
@@ -12,11 +12,43 @@ Summary:
 
 -   tidyverse and gapminder are awesome and thought provoking!
 -   `str(obj)` : shows the structure of an R object.
+
+``` r
+str(gapminder)
+```
+
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    1704 obs. of  6 variables:
+    ##  $ country  : Factor w/ 142 levels "Afghanistan",..: 1 1 1 1 1 1 1 1 1 1 ...
+    ##  $ continent: Factor w/ 5 levels "Africa","Americas",..: 3 3 3 3 3 3 3 3 3 3 ...
+    ##  $ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+    ##  $ lifeExp  : num  28.8 30.3 32 34 36.1 ...
+    ##  $ pop      : int  8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
+    ##  $ gdpPercap: num  779 821 853 836 740 ...
+
 -   `names(df)` : gives the column names (variables) of a dataframe. Similarly, `ncol()` is equaivalent to `length()`. `nrow()` and `dim()` give number of rows and row x col dimensions of the dataframe.
 -   `as_tibble(df)` : a much nicer summary of large dataframes.
+
+``` r
+as_tibble(gapminder)
+```
+
+    ## # A tibble: 1,704 × 6
+    ##        country continent  year lifeExp      pop gdpPercap
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>
+    ## 1  Afghanistan      Asia  1952  28.801  8425333  779.4453
+    ## 2  Afghanistan      Asia  1957  30.332  9240934  820.8530
+    ## 3  Afghanistan      Asia  1962  31.997 10267083  853.1007
+    ## 4  Afghanistan      Asia  1967  34.020 11537966  836.1971
+    ## 5  Afghanistan      Asia  1972  36.088 13079460  739.9811
+    ## 6  Afghanistan      Asia  1977  38.438 14880372  786.1134
+    ## 7  Afghanistan      Asia  1982  39.854 12881816  978.0114
+    ## 8  Afghanistan      Asia  1987  40.822 13867957  852.3959
+    ## 9  Afghanistan      Asia  1992  41.674 16317921  649.3414
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414
+    ## # ... with 1,694 more rows
+
 -   `summary(num_obj/df_col)` : do this to get a sense of scale and dist.
 -   `plot(dep_var ~ indep_var, df)` : plot two numerical variables from a single dataframe. Syntax is flexible - no need to write df into the second argument if `df$col` used in the first argument. Similar for `boxplot`. `main` and `x/ylab` arguments for the heading and axes labels (respectively) can be added `x/ylim` arguments need to be defined as `c(lower limit, upper limit)` to work.
--   Example:
 
 ``` r
 boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 years (1952-2007)", 
@@ -34,20 +66,55 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 -   Percentages and relative quantities hold much more meaning to humans than simply raw numbers.
 -   `rep(thing, x)` : Replicates (repeats) thing x times.
 -   `nlevels(x)` : Outputs the number of unique observations in the x column. Actually looks at the number of levels in a factor, each unique observation being given a unique level.
--   Example:
 
 ``` r
-ctib <- my_gap %>%
-  filter(country == "Canada")
-my_gap <- my_gap %>%
-  mutate(tmp = rep(ctib$gdpPercap, nlevels(country)),
-         gdpPercapRel = gdpPercap / tmp,
-         tmp = NULL)
+atib <- g %>%
+  filter(country == "Australia")
+my_gap <- g %>%
+  mutate(tmp = rep(atib$gdpPercap, nlevels(country)),
+         gdpPercapRel = gdpPercap / tmp, ## GDP Per Capita relative to Australia
+         tmp = NULL) ## Delete the tmp column
+
+as_tibble(my_gap)
 ```
+
+    ## # A tibble: 1,704 × 7
+    ##        country continent  year lifeExp      pop gdpPercap gdpPercapRel
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>        <dbl>
+    ## 1  Afghanistan      Asia  1952  28.801  8425333  779.4453   0.07763712
+    ## 2  Afghanistan      Asia  1957  30.332  9240934  820.8530   0.07496615
+    ## 3  Afghanistan      Asia  1962  31.997 10267083  853.1007   0.06982769
+    ## 4  Afghanistan      Asia  1967  34.020 11537966  836.1971   0.05756505
+    ## 5  Afghanistan      Asia  1972  36.088 13079460  739.9811   0.04407633
+    ## 6  Afghanistan      Asia  1977  38.438 14880372  786.1134   0.04287689
+    ## 7  Afghanistan      Asia  1982  39.854 12881816  978.0114   0.05021364
+    ## 8  Afghanistan      Asia  1987  40.822 13867957  852.3959   0.03894195
+    ## 9  Afghanistan      Asia  1992  41.674 16317921  649.3414   0.02772029
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414   0.02353296
+    ## # ... with 1,694 more rows
 
 -   Put `eval = False` to display code chunks that do not need output or throw errors without cause.
 -   `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 -   Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.
+-   `table(col/var)` : Builds a table with frequency of each observations for the specified column.
+-   `group_by(col/var)` : Distributed the entire dataset into "buckets" allocated by individual observations of the specified variable. Preferred over `table()` as this func allocates the rows by levels of the var/factor, which makes further analysis simpler.
+
+``` r
+g %>%
+  group_by(continent) %>%
+  summarize(n = n())
+```
+
+    ## # A tibble: 5 × 2
+    ##   continent     n
+    ##      <fctr> <int>
+    ## 1    Africa   624
+    ## 2  Americas   300
+    ## 3      Asia   396
+    ## 4    Europe   360
+    ## 5   Oceania    24
+
+-   `n_distinct(col/var)` :
 
 bla <http://rmarkdown.rstudio.com>.
 

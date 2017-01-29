@@ -6,6 +6,7 @@ A cheat sheet collection of all data science stuff I have learnt so far. This is
 Packages referenced here include:
 
 * `tidyverse`
+* `gapminder`
 
 **Just look at the .md files. Everything else is pretty much useless.**
 
