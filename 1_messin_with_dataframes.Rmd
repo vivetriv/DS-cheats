@@ -57,6 +57,14 @@ a_rel <- g %>%
 as_tibble(a_rel)
 ```
 
+* `hist(num col/var, probablity = TRUE/FALSE)` : Generates a histogram of given numerical variable with the choice of displaying raw frequencies (default) or probability densities on the y-axis.
+```{r hist_07}
+RelLatest <- a_rel %>%
+  filter(year == "2007")
+
+hist(RelLatest$gdpPercapRel)
+```
+
 * Put `eval = False` to display code chunks that do not need output or throw errors without cause.
 * `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 * Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.

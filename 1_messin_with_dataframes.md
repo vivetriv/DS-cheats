@@ -93,6 +93,17 @@ as_tibble(a_rel)
     ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414   0.02353296
     ## # ... with 1,694 more rows
 
+-   `hist(num col/var, probablity = TRUE/FALSE)` : Generates a histogram of given numerical variable with the choice of displaying raw frequencies (default) or probability densities on the y-axis.
+
+``` r
+RelLatest <- a_rel %>%
+  filter(year == "2007")
+
+hist(RelLatest$gdpPercapRel)
+```
+
+![](1_messin_with_dataframes_files/figure-markdown_github/hist_07-1.png)
+
 -   Put `eval = False` to display code chunks that do not need output or throw errors without cause.
 -   `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 -   Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.
