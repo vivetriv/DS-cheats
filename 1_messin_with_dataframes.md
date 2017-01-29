@@ -70,12 +70,12 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 ``` r
 atib <- g %>%
   filter(country == "Australia")
-my_gap <- g %>%
+a_rel <- g %>%
   mutate(tmp = rep(atib$gdpPercap, nlevels(country)),
          gdpPercapRel = gdpPercap / tmp, ## GDP Per Capita relative to Australia
          tmp = NULL) ## Delete the tmp column
 
-as_tibble(my_gap)
+as_tibble(a_rel)
 ```
 
     ## # A tibble: 1,704 × 7
@@ -114,7 +114,26 @@ g %>%
     ## 4    Europe   360
     ## 5   Oceania    24
 
--   `n_distinct(col/var)` :
+-   `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
+-   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
+-   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantage of being able to add and define multiple columns after a comma, preferably on a new line.
+-   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations.
+
+``` r
+g %>%
+  group_by(continent) %>%
+  summarize(n = n(),
+            n_countries = n_distinct(country))
+```
+
+    ## # A tibble: 5 × 3
+    ##   continent     n n_countries
+    ##      <fctr> <int>       <int>
+    ## 1    Africa   624          52
+    ## 2  Americas   300          25
+    ## 3      Asia   396          33
+    ## 4    Europe   360          30
+    ## 5   Oceania    24           2
 
 bla <http://rmarkdown.rstudio.com>.
 
