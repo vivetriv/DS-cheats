@@ -130,7 +130,7 @@ g %>%
 
 -   `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
 -   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
--   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantage of being able to add and define multiple columns after a comma, preferably on a new line.
+-   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
 -   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations.
 
 ``` r
@@ -148,6 +148,34 @@ g %>%
     ## 3      Asia   396          33
     ## 4    Europe   360          30
     ## 5   Oceania    24           2
+
+-   `summarise_each(funs(stat_funcs), col/vars...)` : Ditto `summarise()`, but can apply the given statistical functions to multiple variables.
+
+``` r
+life_gdp <- g %>%
+  filter(year == c(2002, 2007)) %>%
+  group_by(continent, year) %>%
+  summarise_each(funs(mean, median), lifeExp, gdpPercap)
+
+life_gdp
+```
+
+    ## Source: local data frame [10 x 6]
+    ## Groups: continent [?]
+    ## 
+    ##    continent  year lifeExp_mean gdpPercap_mean lifeExp_median
+    ##       <fctr> <int>        <dbl>          <dbl>          <dbl>
+    ## 1     Africa  2002     53.32523       2599.385        51.2355
+    ## 2     Africa  2007     54.80604       3089.033        52.9265
+    ## 3   Americas  2002     72.42204       9287.677        72.0470
+    ## 4   Americas  2007     73.60812      11003.032        72.8990
+    ## 5       Asia  2002     69.23388      10174.090        71.0280
+    ## 6       Asia  2007     70.72848      12473.027        72.3960
+    ## 7     Europe  2002     76.70060      21711.732        77.5365
+    ## 8     Europe  2007     77.64860      25054.482        78.6085
+    ## 9    Oceania  2002     79.74000      26938.778        79.7400
+    ## 10   Oceania  2007     80.71950      29810.188        80.7195
+    ## # ... with 1 more variables: gdpPercap_median <dbl>
 
 bla <http://rmarkdown.rstudio.com>.
 
