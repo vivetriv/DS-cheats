@@ -1,7 +1,7 @@
 ---
 title: "1. Messin' with dataframes"
 author: "Vivek Trivedi"
-date: "29 January 2017"
+date: "2 February 2017"
 output: github_document
 ---
 
@@ -98,7 +98,7 @@ g %>%
 ```
 
 * `first(col/var)` : Returns the first value of the specified variable within a group bucket.
-  **Caution:** Raw order of the variables in the dataframe matters. Arrange data, and double-check before applying this function.
+  **Caution:** Raw order of the observed values in the dataframe matters. Arrange data, and double-check before applying this function.
 ``` {r life_gain}
 g %>%
   select(country, year, lifeExp) %>%
@@ -106,6 +106,31 @@ g %>%
   group_by(country) %>%
   mutate(lifeGain = lifeExp - first(lifeExp)) %>%
   arrange(lifeGain)
+```
+
+* `min_rank(col) {operator} value` : Arranges all observations of the variable in ascending order and returns ranked observations as per the condition in the argument. Use `desc()` for maximum ranked observations. `top_n(1, wt = lifeExp)` works the same as `min_rank(lifeExp == 1)`.
+* `print(n=Inf)`: Print all rows of a given output instead of truncating it like in `as_tibble()`.
+``` {r rank_func}
+g %>%
+  select(year, country, gdpPercap) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(gdpPercap)) < 2 | min_rank(gdpPercap) < 2) %>% 
+  arrange(year, gdpPercap) %>%
+  print(n=Inf)
+```
+
+* `lag(col/var)`: Returns the next observed value of the group "bucket" variable vector. Opposite of `lead()`, which returns the previous value. **Caution:** Raw order of observed variable values matters. 
+``` {r lag}
+g %>%
+  select(year, country, gdpPercap) %>%
+  group_by(country) %>%
+  mutate(da_sigma = gdpPercap - lag(gdpPercap)) %>%
+  filter(year > 1952) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(da_sigma)) < 3) %>%
+  arrange(year, da_sigma) %>%
+  print(n=Inf)
+  
 ```
 
 bla

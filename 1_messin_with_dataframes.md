@@ -1,7 +1,7 @@
 1.  Messin' with dataframes
 ================
 Vivek Trivedi
-29 January 2017
+2 February 2017
 
 ![Fig 1: R object type cheat sheet](fig_1.PNG)
 
@@ -159,7 +159,7 @@ g %>%
     ## 10   Oceania  2007     80.71950      29810.188        80.7195
     ## # ... with 1 more variables: gdpPercap_median <dbl>
 
--   `first(col/var)` : Returns the first value of the specified variable within a group bucket. **Caution:** Raw order of the variables in the dataframe matters. Arrange data, and double-check before applying this function.
+-   `first(col/var)` : Returns the first value of the specified variable within a group bucket. **Caution:** Raw order of the observed values in the dataframe matters. Arrange data, and double-check before applying this function.
 
 ``` r
 g %>%
@@ -186,6 +186,90 @@ g %>%
     ## 9  South Africa  2007  49.339  -12.549
     ## 10     Botswana  2007  50.728  -12.017
     ## # ... with 558 more rows
+
+-   `min_rank(col) {operator} value` : Arranges all observations of the variable in ascending order and returns ranked observations as per the condition in the argument. Use `desc()` for maximum ranked observations. `top_n(1, wt = lifeExp)` works the same as `min_rank(lifeExp == 1)`.
+-   `print(n=Inf)`: Print all rows of a given output instead of truncating it like in `as_tibble()`.
+
+``` r
+g %>%
+  select(year, country, gdpPercap) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(gdpPercap)) < 2 | min_rank(gdpPercap) < 2) %>% 
+  arrange(year, gdpPercap) %>%
+  print(n=Inf)
+```
+
+    ## Source: local data frame [24 x 3]
+    ## Groups: year [12]
+    ## 
+    ##     year          country   gdpPercap
+    ##    <int>           <fctr>       <dbl>
+    ## 1   1952          Lesotho    298.8462
+    ## 2   1952           Kuwait 108382.3529
+    ## 3   1957          Lesotho    335.9971
+    ## 4   1957           Kuwait 113523.1329
+    ## 5   1962          Burundi    355.2032
+    ## 6   1962           Kuwait  95458.1118
+    ## 7   1967          Myanmar    349.0000
+    ## 8   1967           Kuwait  80894.8833
+    ## 9   1972          Myanmar    357.0000
+    ## 10  1972           Kuwait 109347.8670
+    ## 11  1977          Myanmar    371.0000
+    ## 12  1977           Kuwait  59265.4771
+    ## 13  1982          Myanmar    424.0000
+    ## 14  1982     Saudi Arabia  33693.1753
+    ## 15  1987          Myanmar    385.0000
+    ## 16  1987           Norway  31540.9748
+    ## 17  1992          Myanmar    347.0000
+    ## 18  1992           Kuwait  34932.9196
+    ## 19  1997 Congo, Dem. Rep.    312.1884
+    ## 20  1997           Norway  41283.1643
+    ## 21  2002 Congo, Dem. Rep.    241.1659
+    ## 22  2002           Norway  44683.9753
+    ## 23  2007 Congo, Dem. Rep.    277.5519
+    ## 24  2007           Norway  49357.1902
+
+-   `lag(col/var)`: Returns the next observed value of the group "bucket" variable vector. Opposite of `lead()`, which returns the previous value. **Caution:** Raw order of observed variable values matters.
+
+``` r
+g %>%
+  select(year, country, gdpPercap) %>%
+  group_by(country) %>%
+  mutate(da_sigma = gdpPercap - lag(gdpPercap)) %>%
+  filter(year > 1952) %>%
+  group_by(year) %>%
+  filter(min_rank(desc(da_sigma)) < 3) %>%
+  arrange(year, da_sigma) %>%
+  print(n=Inf)
+```
+
+    ## Source: local data frame [22 x 4]
+    ## Groups: year [11]
+    ## 
+    ##     year           country  gdpPercap  da_sigma
+    ##    <int>            <fctr>      <dbl>     <dbl>
+    ## 1   1957       Switzerland  17909.490  3175.257
+    ## 2   1957            Kuwait 113523.133  5140.780
+    ## 3   1962             Libya   6757.031  3308.746
+    ## 4   1962      Saudi Arabia  11626.420  3468.829
+    ## 5   1967      Saudi Arabia  16903.049  5276.629
+    ## 6   1967             Libya  18772.752 12015.721
+    ## 7   1972      Saudi Arabia  24837.429  7934.380
+    ## 8   1972            Kuwait 109347.867 28452.984
+    ## 9   1977      Saudi Arabia  34167.763  9330.334
+    ## 10  1977             Gabon  21745.573 10343.625
+    ## 11  1982           Iceland  23269.607  3614.645
+    ## 12  1982         Singapore  15169.161  3959.072
+    ## 13  1987            Norway  31540.975  5242.339
+    ## 14  1987  Hong Kong, China  20038.473  5477.942
+    ## 15  1992         Singapore  24769.891  5908.360
+    ## 16  1992            Kuwait  34932.920  6814.490
+    ## 17  1997            Norway  41283.164  7317.503
+    ## 18  1997         Singapore  33519.477  8749.585
+    ## 19  2002 Equatorial Guinea   7703.496  4889.015
+    ## 20  2002           Ireland  34077.049  9555.102
+    ## 21  2007         Singapore  47143.180 11120.074
+    ## 22  2007            Kuwait  47306.990 12196.884
 
 bla <http://rmarkdown.rstudio.com>.
 
