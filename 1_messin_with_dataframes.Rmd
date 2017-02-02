@@ -49,12 +49,11 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 ```{r mut_rep}
 atib <- g %>%
   filter(country == "Australia")
+
 a_rel <- g %>%
   mutate(tmp = rep(atib$gdpPercap, nlevels(country)),
          gdpPercapRel = gdpPercap / tmp, ## GDP Per Capita relative to Australia
          tmp = NULL) ## Delete the tmp column
-
-as_tibble(a_rel)
 ```
 
 * `hist(num col/var, probablity = TRUE/FALSE)` : Generates a histogram of given numerical variable with the choice of displaying raw frequencies (default) or probability densities on the y-axis.
@@ -72,7 +71,7 @@ hist(RelLatest$gdpPercapRel, main = "Distribution of GDP Per Capita relative to 
 * `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 * Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.
 * `table(col/var)` : Builds a table with frequency of each observations for the specified column.
-* `group_by(col/var)` : Distributed the entire dataset into "buckets" allocated by individual observations of the specified variable. Preferred over `table()` as this func allocates the rows by levels of the var/factor, which makes further analysis simpler.
+* `group_by(col/var)` : Distributes the entire dataset into "buckets" allocated according to the levels of the specified variable/s (factor/s). Preferred over `table()` as this func allocates the rows by levels of the var/factor, which makes further analysis simpler. For instance, if `group_by(continent, year)`, imagine buckets labelled *"continent x, year y"* with the corresponding data for all observations for all combinations of the continent-year pairing allocated buckets accordingly.
 ``` {r gr_summ} 
 g %>%
   group_by(continent) %>%
@@ -82,7 +81,7 @@ g %>%
 * `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
 * `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
 * `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.\
-* `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations.
+* `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
 ``` {r g_summ_distinct}
 g %>%
   group_by(continent) %>%
@@ -92,15 +91,23 @@ g %>%
 
 * `summarise_each(funs(stat_funcs), col/vars...)` : Ditto `summarise()`, but can apply the given statistical functions to multiple variables.
 ```{r summ_e}
-life_gdp <- g %>%
+g %>%
   filter(year == c(2002, 2007)) %>%
   group_by(continent, year) %>%
   summarise_each(funs(mean, median), lifeExp, gdpPercap)
-
-life_gdp
 ```
 
-* `
+* `first(col/var)` : Returns the first value of the specified variable within a group bucket.
+  **Caution:** Raw order of the variables in the dataframe matters. Arrange data, and double-check before applying this function.
+``` {r life_gain}
+g %>%
+  select(country, year, lifeExp) %>%
+  filter(year > 1990) %>%
+  group_by(country) %>%
+  mutate(lifeGain = lifeExp - first(lifeExp)) %>%
+  arrange(lifeGain)
+```
+
 bla
 <http://rmarkdown.rstudio.com>.
 

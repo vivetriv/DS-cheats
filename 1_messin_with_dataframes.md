@@ -70,28 +70,12 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 ``` r
 atib <- g %>%
   filter(country == "Australia")
+
 a_rel <- g %>%
   mutate(tmp = rep(atib$gdpPercap, nlevels(country)),
          gdpPercapRel = gdpPercap / tmp, ## GDP Per Capita relative to Australia
          tmp = NULL) ## Delete the tmp column
-
-as_tibble(a_rel)
 ```
-
-    ## # A tibble: 1,704 × 7
-    ##        country continent  year lifeExp      pop gdpPercap gdpPercapRel
-    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>        <dbl>
-    ## 1  Afghanistan      Asia  1952  28.801  8425333  779.4453   0.07763712
-    ## 2  Afghanistan      Asia  1957  30.332  9240934  820.8530   0.07496615
-    ## 3  Afghanistan      Asia  1962  31.997 10267083  853.1007   0.06982769
-    ## 4  Afghanistan      Asia  1967  34.020 11537966  836.1971   0.05756505
-    ## 5  Afghanistan      Asia  1972  36.088 13079460  739.9811   0.04407633
-    ## 6  Afghanistan      Asia  1977  38.438 14880372  786.1134   0.04287689
-    ## 7  Afghanistan      Asia  1982  39.854 12881816  978.0114   0.05021364
-    ## 8  Afghanistan      Asia  1987  40.822 13867957  852.3959   0.03894195
-    ## 9  Afghanistan      Asia  1992  41.674 16317921  649.3414   0.02772029
-    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414   0.02353296
-    ## # ... with 1,694 more rows
 
 -   `hist(num col/var, probablity = TRUE/FALSE)` : Generates a histogram of given numerical variable with the choice of displaying raw frequencies (default) or probability densities on the y-axis.
 
@@ -111,7 +95,7 @@ hist(RelLatest$gdpPercapRel, main = "Distribution of GDP Per Capita relative to 
 -   `arrange(df, var/col)` : arranges dataframe with given variable in ascending order. Use `desc(var/col)` for descending order.
 -   Analysis code should never assume a particular row order for the data. Ordering rows is nice for human viewing, however.
 -   `table(col/var)` : Builds a table with frequency of each observations for the specified column.
--   `group_by(col/var)` : Distributed the entire dataset into "buckets" allocated by individual observations of the specified variable. Preferred over `table()` as this func allocates the rows by levels of the var/factor, which makes further analysis simpler.
+-   `group_by(col/var)` : Distributes the entire dataset into "buckets" allocated according to the levels of the specified variable/s (factor/s). Preferred over `table()` as this func allocates the rows by levels of the var/factor, which makes further analysis simpler. For instance, if `group_by(continent, year)`, imagine buckets labelled *"continent x, year y"* with the corresponding data for all observations for all combinations of the continent-year pairing allocated buckets accordingly.
 
 ``` r
 g %>%
@@ -131,7 +115,7 @@ g %>%
 -   `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
 -   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
 -   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
--   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations.
+-   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
 
 ``` r
 g %>%
@@ -152,12 +136,10 @@ g %>%
 -   `summarise_each(funs(stat_funcs), col/vars...)` : Ditto `summarise()`, but can apply the given statistical functions to multiple variables.
 
 ``` r
-life_gdp <- g %>%
+g %>%
   filter(year == c(2002, 2007)) %>%
   group_by(continent, year) %>%
   summarise_each(funs(mean, median), lifeExp, gdpPercap)
-
-life_gdp
 ```
 
     ## Source: local data frame [10 x 6]
@@ -176,6 +158,34 @@ life_gdp
     ## 9    Oceania  2002     79.74000      26938.778        79.7400
     ## 10   Oceania  2007     80.71950      29810.188        80.7195
     ## # ... with 1 more variables: gdpPercap_median <dbl>
+
+-   `first(col/var)` : Returns the first value of the specified variable within a group bucket. **Caution:** Raw order of the variables in the dataframe matters. Arrange data, and double-check before applying this function.
+
+``` r
+g %>%
+  select(country, year, lifeExp) %>%
+  filter(year > 1990) %>%
+  group_by(country) %>%
+  mutate(lifeGain = lifeExp - first(lifeExp)) %>%
+  arrange(lifeGain)
+```
+
+    ## Source: local data frame [568 x 4]
+    ## Groups: country [142]
+    ## 
+    ##         country  year lifeExp lifeGain
+    ##          <fctr> <int>   <dbl>    <dbl>
+    ## 1      Zimbabwe  2002  39.989  -20.388
+    ## 2     Swaziland  2007  39.613  -18.861
+    ## 3       Lesotho  2007  42.592  -17.093
+    ## 4      Zimbabwe  2007  43.487  -16.890
+    ## 5      Botswana  2002  46.634  -16.111
+    ## 6       Lesotho  2002  44.593  -15.092
+    ## 7     Swaziland  2002  43.869  -14.605
+    ## 8      Zimbabwe  1997  46.809  -13.568
+    ## 9  South Africa  2007  49.339  -12.549
+    ## 10     Botswana  2007  50.728  -12.017
+    ## # ... with 558 more rows
 
 bla <http://rmarkdown.rstudio.com>.
 
