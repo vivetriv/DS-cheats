@@ -115,6 +115,7 @@ g %>%
 -   `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
 -   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
 -   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
+-   `na.rm = TRUE`: Excludes missing values from analysis when added to the argument of an aforementioned statistical functions following a comma. Opposite action for `FALSE`.
 -   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
 
 ``` r
@@ -233,7 +234,7 @@ g %>%
 
 ``` r
 g %>%
-  select(year, country, gdpPercap) %>%
+  select(year, continent, country, gdpPercap) %>%
   group_by(country) %>%
   mutate(da_sigma = gdpPercap - lag(gdpPercap)) %>%
   filter(year > 1952) %>%
@@ -243,34 +244,30 @@ g %>%
   print(n=Inf)
 ```
 
-    ## Source: local data frame [22 x 4]
+    ## Source: local data frame [22 x 5]
     ## Groups: year [11]
     ## 
-    ##     year           country  gdpPercap  da_sigma
-    ##    <int>            <fctr>      <dbl>     <dbl>
-    ## 1   1957       Switzerland  17909.490  3175.257
-    ## 2   1957            Kuwait 113523.133  5140.780
-    ## 3   1962             Libya   6757.031  3308.746
-    ## 4   1962      Saudi Arabia  11626.420  3468.829
-    ## 5   1967      Saudi Arabia  16903.049  5276.629
-    ## 6   1967             Libya  18772.752 12015.721
-    ## 7   1972      Saudi Arabia  24837.429  7934.380
-    ## 8   1972            Kuwait 109347.867 28452.984
-    ## 9   1977      Saudi Arabia  34167.763  9330.334
-    ## 10  1977             Gabon  21745.573 10343.625
-    ## 11  1982           Iceland  23269.607  3614.645
-    ## 12  1982         Singapore  15169.161  3959.072
-    ## 13  1987            Norway  31540.975  5242.339
-    ## 14  1987  Hong Kong, China  20038.473  5477.942
-    ## 15  1992         Singapore  24769.891  5908.360
-    ## 16  1992            Kuwait  34932.920  6814.490
-    ## 17  1997            Norway  41283.164  7317.503
-    ## 18  1997         Singapore  33519.477  8749.585
-    ## 19  2002 Equatorial Guinea   7703.496  4889.015
-    ## 20  2002           Ireland  34077.049  9555.102
-    ## 21  2007         Singapore  47143.180 11120.074
-    ## 22  2007            Kuwait  47306.990 12196.884
-
-bla <http://rmarkdown.rstudio.com>.
-
-**bold** *italics*
+    ##     year continent           country  gdpPercap  da_sigma
+    ##    <int>    <fctr>            <fctr>      <dbl>     <dbl>
+    ## 1   1957    Europe       Switzerland  17909.490  3175.257
+    ## 2   1957      Asia            Kuwait 113523.133  5140.780
+    ## 3   1962    Africa             Libya   6757.031  3308.746
+    ## 4   1962      Asia      Saudi Arabia  11626.420  3468.829
+    ## 5   1967      Asia      Saudi Arabia  16903.049  5276.629
+    ## 6   1967    Africa             Libya  18772.752 12015.721
+    ## 7   1972      Asia      Saudi Arabia  24837.429  7934.380
+    ## 8   1972      Asia            Kuwait 109347.867 28452.984
+    ## 9   1977      Asia      Saudi Arabia  34167.763  9330.334
+    ## 10  1977    Africa             Gabon  21745.573 10343.625
+    ## 11  1982    Europe           Iceland  23269.607  3614.645
+    ## 12  1982      Asia         Singapore  15169.161  3959.072
+    ## 13  1987    Europe            Norway  31540.975  5242.339
+    ## 14  1987      Asia  Hong Kong, China  20038.473  5477.942
+    ## 15  1992      Asia         Singapore  24769.891  5908.360
+    ## 16  1992      Asia            Kuwait  34932.920  6814.490
+    ## 17  1997    Europe            Norway  41283.164  7317.503
+    ## 18  1997      Asia         Singapore  33519.477  8749.585
+    ## 19  2002    Africa Equatorial Guinea   7703.496  4889.015
+    ## 20  2002    Europe           Ireland  34077.049  9555.102
+    ## 21  2007      Asia         Singapore  47143.180 11120.074
+    ## 22  2007      Asia            Kuwait  47306.990 12196.884

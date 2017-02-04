@@ -80,7 +80,8 @@ g %>%
 
 * `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
 * `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
-* `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.\
+* `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
+* `na.rm = TRUE`: Excludes missing values from analysis when added to the argument of an aforementioned statistical functions following a comma. Opposite action for `FALSE`.
 * `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
 ``` {r g_summ_distinct}
 g %>%
@@ -119,10 +120,10 @@ g %>%
   print(n=Inf)
 ```
 
-* `lag(col/var)`: Returns the next observed value of the group "bucket" variable vector. Opposite of `lead()`, which returns the previous value. **Caution:** Raw order of observed variable values matters. 
+* `lag(col/var)`: Returns the next observed value of the group "bucket" variable vector. Opposite of `lead()`, which returns the previous value. **Caution:** Raw order of observed variable values matters.
 ``` {r lag}
 g %>%
-  select(year, country, gdpPercap) %>%
+  select(year, continent, country, gdpPercap) %>%
   group_by(country) %>%
   mutate(da_sigma = gdpPercap - lag(gdpPercap)) %>%
   filter(year > 1952) %>%
@@ -130,10 +131,4 @@ g %>%
   filter(min_rank(desc(da_sigma)) < 3) %>%
   arrange(year, da_sigma) %>%
   print(n=Inf)
-  
 ```
-
-bla
-<http://rmarkdown.rstudio.com>.
-
-**bold** *italics*
