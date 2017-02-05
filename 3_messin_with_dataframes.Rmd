@@ -1,0 +1,12 @@
+---
+title: 'Extras: Messin'' with dataframes'
+author: "Vivek Trivedi"
+date: "5 February 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Random diggings

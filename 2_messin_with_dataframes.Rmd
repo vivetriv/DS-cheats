@@ -7,24 +7,79 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(gapminder)
+library(tidyverse)
 ```
 
-## R Markdown
+# Investigative question...
+**Was there ever a country that did not have a correlational relationship between GDP per capita and life expectancy in a five year period between 1955 and 2007? If so, why did that occur? If not, why did this not occur in recent memory?**
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Process
+Set up environment `-->` Data `-->` ascertain its order and arrangement `-->` group by continent, country `-->` add columns for change in GDP Per Capita and life expectency from previous five years `-->` verify `-->` make a new bare-bones copy of data `-->` filter for lack of coorelational relationship between the two `-->` ??? `-->` Profit.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#The Magic
+``` {r prelim}
+rm(list=ls())
+graphics.off()
 
-```{r cars}
-summary(cars)
+library(gapminder)
+library(tidyverse)
+
+g <- gapminder
 ```
 
-## Including Plots
+``` {r part-0}
+analysis_1 <- g %>%
+  arrange(country, year) %>%
+  group_by(continent, country) %>%
+  mutate(changeGdpPC = ((gdpPercap - lag(gdpPercap))*100/lag(gdpPercap)),
+         changeLEPC = ((lifeExp - lag(lifeExp))*100/lag(lifeExp))) # Brackets galore
 
-You can also embed plots, for example:
+options(tibble.width = Inf) # Shows all columns of a tibble... a bit ugly though.
+analysis_1
+```
+**Looking alright so far...**
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+# Countries with a five yearly increase in GDP Per Capita and a decrease in life expectancy...
+``` {r gdp-up-exp-down}
+finale_data <- analysis_1 %>%
+  select(country, continent, year, changeGdpPC, changeLEPC)
+
+prod_1 <- finale_data %>%
+  filter(changeGdpPC > 0) %>%
+  filter(changeLEPC < -1) %>% # Arbitary threshold to reduce noise
+  arrange(changeLEPC)
+
+print(prod_1, n = 50)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Countries with a five yearly increase in Life Expectancy and an increase in GDP Per Capita...
+``` {r gdp-down-lifeExp-up}
+finale_data <- analysis_1 %>%
+  select(country, continent, year, changeGdpPC, changeLEPC)
+
+prod_2 <- finale_data %>%
+  filter(changeGdpPC < -5) %>% # Arbitary thresholds to reduce noise
+  filter(changeLEPC > 1) %>%
+  arrange(changeGdpPC)
+
+print(prod_2, n = 50)
+```
+
+
+# Fishing for interesting crumbs...
+```{r plot-1}
+plot(prod_1$changeGdpPC~prod_1$changeLEPC)
+hist(prod_1$year)
+plot(prod_1$continent) 
+# hist() did not work for some reason, eventhough the continents
+# are levels within the factor "continent".
+```
+
+```{r plot-2}
+plot(prod_2$changeLEPC~prod_2$changeGdpPC)
+hist(prod_2$year)
+plot(prod_2$continent)
+```
+
