@@ -1,0 +1,16 @@
+---
+title: "Plotting somethin' nefarious"
+author: "Vivek Trivedi"
+date: "6 February 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Summary:
+* Rules for making graphing life easy...
+![Fig 2: Cardinal Rules for graphmaking in R. Avoidance mechanism of many hairpulling, headbanging, faceplaming moments](fig_2.PNG)
+
+* 
+

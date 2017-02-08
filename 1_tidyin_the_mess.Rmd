@@ -1,0 +1,97 @@
+---
+title: "Tidyin' the Mess"
+author: "Vivek Trivedi"
+date: "6 February 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+# Summary
+* R is a data-aware language. It instrinsically knows the structure of data.
+* Tidy data is (essentially) a single data frame with columns representing variables and rows representing observations. It looks not very pretty to us, but R loves tidy data data aggregation for graphics.
+* Remember, the first argument is most of these functions is the initial object to be manipulated. Therefore, use the pipe operator if needed.
+
+---
+
+### Operations for similar data frames
+* `read_csv(file.path(path/to/file))`: Imports csv files into the workspace. Other `read` variants [also exist](https://github.com/tidyverse/readr). `read_csv(chrDataFrame, trim_ws = TRUE, skip = 1)` can extract comma separated data from a character type object into a tibble/data frame.
+``` {r import, message = FALSE}
+# library(tidyverse)
+males <- read_csv(file.path("males.csv"))
+females <- read_csv(file.path("females.csv"))
+```
+
+* Use `message = FALSE` in RMarkdown code chunk headers to hide code execution messages from being displayed.
+* `bind_rows(df1, df2...)`: Combines multiple dataframes into a single one by putting the names of the dataframes in a separate column/variable.
+``` {r bind}
+data_untidy <- bind_rows(males, females)
+data_untidy
+```
+
+* `gather(untidy_df, key = 'new_col/var', value = 'numbers', old_col1, old_col2...)`: Turns the title of column/s in a dataframe into an observation in each row/sample. 
+``` {r gather}
+data_tidy <- gather(data_untidy, key = 'Species', value = 'Words', Elf, Hobbit, Man)
+data_tidy
+```
+
+* `write_csv(tidy_df, file.path("desired/path/to/csv"))`: Write dataframes to given location as a .csv file.
+``` {r write}
+write_csv(data_tidy, file.path("lotr_tidy.csv"))
+```
+
+* `unite(tib_df, combined_var, var1, var2)`: Combines the data and names of two columns into a single column.
+``` {r unite}
+data_mashed <- data_tidy %>%
+  unite(Race_Gender, Species, Gender)
+
+data_mashed
+```
+
+* `spread(tidy_df, key = new_col/vars, value = old_col/vars)` : Opposite of `gather()`. Turns the observations of the `key` variable into column/variable. The result is much nicer to human eyeballs.
+``` {r spread}
+data_mashed %>%
+  spread(key = Race_Gender, value = Words) %>%
+  print(width = Inf)
+```
+
+---
+
+### Operations for (kind of) disparate data frames
+* `read_csv(chrDataFrame, trim_ws = TRUE, skip = 1)`: Extracts comma separated data from a character type object into a tibble/data frame. The `trim_ws` argument is used to exclude the preceding and succeeding whitespace around the data. `skip` is used to point out how many lines from the top are not part of the data.
+``` {r superhero-entry}
+superheroes <- "
+name,   alignment,  gender, publisher   
+Magneto,   bad,    male,   Marvel
+Storm,  good,   female, Marvel
+Mystique,   bad,    female,    Marvel
+Batman,   good,   male,   DC
+Joker,  bad,    male,   DC
+Catwoman,   bad,    female, DC
+Hellboy,    good,   male,   Dark Horse Comics
+" # Data separated by one tab. The next action works with other types of whitespaces too (such as space).
+
+superheroes <- read_csv(superheroes, trim_ws = TRUE, skip = 1)
+
+publishers <- "
+  publisher, yr_founded
+         DC,       1934
+     Marvel,       1939
+      Image,       1992
+"
+publishers <- read_csv(publishers, trim_ws = TRUE, skip = 1)
+
+superheroes
+publishers
+```
+
+* `inner_join(df1, df2)`: Kind of like df1 intersect df2. Returns all rows from x where there are matching values in y, and all columns from x and y.
+``` {r inner-join}
+inner_join(superheroes, publishers)
+```
+Notice how Hellboy is not present in the dataframe, as the "publisher" value of that row is not present in the `publishers` data frame. Also, the publisher "Image" is not present in the result due to the same reason.
+
+* `semi_join(df1, df2`: Return all rows from x where there are matching values in y, keeping just columns from x. A semi join differs from an inner join because an inner join will return one row of x for each matching row of y, where a semi join will never duplicate rows of x. This is a filtering join.
+ 
