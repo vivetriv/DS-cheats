@@ -9,6 +9,7 @@ Summary
 -   R is a data-aware language. It instrinsically knows the structure of data.
 -   Tidy data is (essentially) a single data frame with columns representing variables and rows representing observations. It looks not very pretty to us, but R loves tidy data data aggregation for graphics.
 -   Remember, the first argument is most of these functions is the initial object to be manipulated. Therefore, use the pipe operator if needed.
+-   Be vary of commands that change the arrangement/order of rows.
 
 ------------------------------------------------------------------------
 
@@ -130,6 +131,8 @@ data_mashed %>%
 
 ### Operations for (kind of) disparate data frames
 
+-   **Caution:** Join functions love changing the order of the original data. Arrange, filter and ascertain data order appropriately before performing analysis.
+-   **Also, caution:** Order of data frames in arguments matters. A lot.
 -   `read_csv(chrDataFrame, trim_ws = TRUE, skip = 1)`: Extracts comma separated data from a character type object into a tibble/data frame. The `trim_ws` argument is used to exclude the preceding and succeeding whitespace around the data. `skip` is used to point out how many lines from the top are not part of the data.
 
 ``` r
@@ -179,7 +182,50 @@ publishers
     ## 2    Marvel       1939
     ## 3     Image       1992
 
--   `inner_join(df1, df2)`: Kind of like df1 intersect df2. Returns all rows from x where there are matching values in y, and all columns from x and y.
+**Going from most mutating to most filtering...**
+
+-   `full_join(df1, df2)` : df1 union df2. Returns all rows and columns for df1 and df2, but with `NA` for missing values.
+
+``` r
+full_join(publishers, superheroes)
+```
+
+    ## Joining, by = "publisher"
+
+    ## # A tibble: 8 × 5
+    ##           publisher yr_founded     name alignment gender
+    ##               <chr>      <int>    <chr>     <chr>  <chr>
+    ## 1                DC       1934   Batman      good   male
+    ## 2                DC       1934    Joker       bad   male
+    ## 3                DC       1934 Catwoman       bad female
+    ## 4            Marvel       1939  Magneto       bad   male
+    ## 5            Marvel       1939    Storm      good female
+    ## 6            Marvel       1939 Mystique       bad female
+    ## 7             Image       1992     <NA>      <NA>   <NA>
+    ## 8 Dark Horse Comics         NA  Hellboy      good   male
+
+-   `left_join(df1, df2)`: Basically, df1 union df2, except only returns the rows from df1. Multiple matches produce multiple rows. Puts down `NA` values for non-matching values.
+
+``` r
+left_join(publishers, superheroes)
+```
+
+    ## Joining, by = "publisher"
+
+    ## # A tibble: 7 × 5
+    ##   publisher yr_founded     name alignment gender
+    ##       <chr>      <int>    <chr>     <chr>  <chr>
+    ## 1        DC       1934   Batman      good   male
+    ## 2        DC       1934    Joker       bad   male
+    ## 3        DC       1934 Catwoman       bad female
+    ## 4    Marvel       1939  Magneto       bad   male
+    ## 5    Marvel       1939    Storm      good female
+    ## 6    Marvel       1939 Mystique       bad female
+    ## 7     Image       1992     <NA>      <NA>   <NA>
+
+Notice that the Hellboy row from `superheroes` does not appear in the result, as it has not matching value in df1, `publishers`.
+
+-   `inner_join(df1, df2)`: Kind of like df1 intersect df2. Returns all rows from df1 where there are matching values in df2, and all columns from df1 and df2.
 
 ``` r
 inner_join(superheroes, publishers)
@@ -199,4 +245,29 @@ inner_join(superheroes, publishers)
 
 Notice how Hellboy is not present in the dataframe, as the "publisher" value of that row is not present in the `publishers` data frame. Also, the publisher "Image" is not present in the result due to the same reason.
 
--   `semi_join(df1, df2`: Return all rows from x where there are matching values in y, keeping just columns from x. A semi join differs from an inner join because an inner join will return one row of x for each matching row of y, where a semi join will never duplicate rows of x. This is a filtering join.
+-   `semi_join(df1, df2)`: Sort of `inner_join()`, except only returns rows from df1. Filters and selects df1 rows with matching values in df2.
+
+``` r
+semi_join(publishers, superheroes)
+```
+
+    ## Joining, by = "publisher"
+
+    ## # A tibble: 2 × 2
+    ##   publisher yr_founded
+    ##       <chr>      <int>
+    ## 1    Marvel       1939
+    ## 2        DC       1934
+
+-   `anti_join(df1, df2)` : df1 - (df1 intersect df2), but only with the columns of df1. If a row in df1 has a matching value in df2, it will be filtered out of the results. Opposite of `semi_join()`.
+
+``` r
+anti_join(superheroes, publishers)
+```
+
+    ## Joining, by = "publisher"
+
+    ## # A tibble: 1 × 4
+    ##      name alignment gender         publisher
+    ##     <chr>     <chr>  <chr>             <chr>
+    ## 1 Hellboy      good   male Dark Horse Comics

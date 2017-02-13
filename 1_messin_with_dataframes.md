@@ -113,7 +113,7 @@ g %>%
     ## 5   Oceania    24
 
 -   `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
--   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
+-   `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substitute to `group_by(col/var)` and `tally()` combined.
 -   `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
 -   `na.rm = TRUE`: Excludes missing values from analysis when added to the argument of an aforementioned statistical functions following a comma. Opposite action for `FALSE`.
 -   `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
@@ -271,3 +271,39 @@ g %>%
     ## 20  2002    Europe           Ireland  34077.049  9555.102
     ## 21  2007      Asia         Singapore  47143.180 11120.074
     ## 22  2007      Asia            Kuwait  47306.990 12196.884
+
+-   `data = {bla}`: Used as an argument in many functions to define and/or filter the data to be used for the analysis. use `.` to include all data. Can also be fed a `subset()` function to filter the data in compute time as an alternative to using multiple piping operators. **Note:** `select()` may not be useful here.
+
+``` r
+g %>%
+  filter(continent == "Oceania") %>%
+  t.test(gdpPercap ~ country, data = .)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  gdpPercap by country
+    ## t = 1.0493, df = 17.358, p-value = 0.3084
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -2738.654  8174.599
+    ## sample estimates:
+    ##   mean in group Australia mean in group New Zealand 
+    ##                  19980.60                  17262.62
+
+``` r
+t.test(gdpPercap ~ country, data = subset(g, continent == "Oceania"))
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  gdpPercap by country
+    ## t = 1.0493, df = 17.358, p-value = 0.3084
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -2738.654  8174.599
+    ## sample estimates:
+    ##   mean in group Australia mean in group New Zealand 
+    ##                  19980.60                  17262.62

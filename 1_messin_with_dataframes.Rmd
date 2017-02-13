@@ -79,7 +79,7 @@ g %>%
 ```
 
 * `tally()` : "Tally" up the frequency of observations in each of the "buckets". Could be used the same way as `summarise(n=n())` in the above example.
-* `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substisute to `group_by(col/var)` and `tally()` combined.
+* `count()` : Count up the frequency of particular observations of a variable in a dataset. Basically, a substitute to `group_by(col/var)` and `tally()` combined.
 * `summarise(col = func)` : Ditto `tally()` if used with `n()` as the function defining the column `n`, however, with the added advantages of being able to add and define multiple columns after a comma, preferably on a new line, and also being able to define variables using `mean()`, `median()`, `var()`, `sd()`, `mad()`, `IQR()`, `min()` and `max()`.
 * `na.rm = TRUE`: Excludes missing values from analysis when added to the argument of an aforementioned statistical functions following a comma. Opposite action for `FALSE`.
 * `n_distinct(col/var)` : Tallies up the frequency of distinct values (levels) of the specified variable (factor) rather than simply the number of observations as with `n()`.
@@ -132,3 +132,14 @@ g %>%
   arrange(year, da_sigma) %>%
   print(n=Inf)
 ```
+
+* `data = {bla}`: Used as an argument in many functions to define and/or filter the data to be used for the analysis. use `.` to include all data. Can also be fed a `subset()` function to filter the data in compute time as an alternative to using multiple piping operators. **Note:** `select()` may not be useful here.
+``` {r data}
+g %>%
+  filter(continent == "Oceania") %>%
+  t.test(gdpPercap ~ country, data = .)
+
+t.test(gdpPercap ~ country, data = subset(g, continent == "Oceania"))
+```
+
+
