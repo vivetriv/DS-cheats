@@ -7,6 +7,7 @@ Packages referenced here include:
 
 * `tidyverse`
 * `gapminder`
+* `broom`
 
 **Just look at the .md files. Everything else is pretty much useless.**
 

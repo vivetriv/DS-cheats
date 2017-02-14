@@ -10,6 +10,8 @@ Fig 1: R Object type cheat table
 Summary:
 ========
 
+### Operations for a single dataset
+
 -   tidyverse and gapminder are awesome and thought provoking!
 -   `str(obj)` : shows the structure of an R object.
 
@@ -61,7 +63,7 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 -   `rename(df, NewColName = old_col_name)` : Rename columns.
 -   `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 -   `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
--   `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe.
+-   `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe. Use `select(x:y)` to filter all columns between and including x, but not y.
 -   `mutate(df, new var/col = func)` : defines and inserts new column into the dataframe.
 -   Percentages and relative quantities hold much more meaning to humans than simply raw numbers.
 -   `rep(thing, x)` : Replicates (repeats) thing x times.
@@ -272,6 +274,8 @@ g %>%
     ## 21  2007      Asia         Singapore  47143.180 11120.074
     ## 22  2007      Asia            Kuwait  47306.990 12196.884
 
+### Split-Apply-Combine Operations for a single dataset
+
 -   `data = {bla}`: Used as an argument in many functions to define and/or filter the data to be used for the analysis. use `.` to include all data. Can also be fed a `subset()` function to filter the data in compute time as an alternative to using multiple piping operators. **Note:** `select()` may not be useful here.
 
 ``` r
@@ -307,3 +311,225 @@ t.test(gdpPercap ~ country, data = subset(g, continent == "Oceania"))
     ## sample estimates:
     ##   mean in group Australia mean in group New Zealand 
     ##                  19980.60                  17262.62
+
+-   `nest()` : Collapses the non-grouping variables into a list-column type variable for further analysis.
+-   `df[row, col]` : Returns the specified component of the given data frame. Blank arguments give entire rows or columns. Names or numbers can be used.
+-   `df$col[row_number]` : Returns the value/s in the specified place.
+
+``` r
+gNested <- g %>%
+   group_by(continent, country) %>% 
+   nest()
+
+gNested[132,]
+```
+
+    ## # A tibble: 1 × 3
+    ##   continent country              data
+    ##      <fctr>  <fctr>            <list>
+    ## 1    Europe  Turkey <tibble [12 × 4]>
+
+``` r
+gNested$data[132]
+```
+
+    ## [[1]]
+    ## # A tibble: 12 × 4
+    ##     year lifeExp      pop gdpPercap
+    ##    <int>   <dbl>    <int>     <dbl>
+    ## 1   1952  43.585 22235677  1969.101
+    ## 2   1957  48.079 25670939  2218.754
+    ## 3   1962  52.098 29788695  2322.870
+    ## 4   1967  54.336 33411317  2826.356
+    ## 5   1972  57.005 37492953  3450.696
+    ## 6   1977  59.507 42404033  4269.122
+    ## 7   1982  61.036 47328791  4241.356
+    ## 8   1987  63.108 52881328  5089.044
+    ## 9   1992  66.146 58179144  5678.348
+    ## 10  1997  68.835 63047647  6601.430
+    ## 11  2002  70.845 67308928  6508.086
+    ## 12  2007  71.777 71158647  8458.276
+
+-   `lm(var1 ~ var2, data = {bla})` : Fits a linear regression model over the given data. `I(var2 - {<smallest value})` denotes the x-axis values and helps set the y-intercept close to the lowest y-axis data value (and not intrapolate values).
+
+``` r
+leYr <- function(df) {
+  lm(lifeExp ~ I(year - 1950), data = df)
+}
+
+leYr(gNested[[132, "data"]])
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = lifeExp ~ I(year - 1950), data = df)
+    ## 
+    ## Coefficients:
+    ##    (Intercept)  I(year - 1950)  
+    ##        45.0278          0.4972
+
+**Notice** the double square brackets? I have no idea why they exist...
+
+-   `map(data, func)` : Applies the given function to the specified data.
+
+``` r
+gNFilt <- gNested[1:5,]
+
+gNFilt
+```
+
+    ## # A tibble: 5 × 3
+    ##   continent     country              data
+    ##      <fctr>      <fctr>            <list>
+    ## 1      Asia Afghanistan <tibble [12 × 4]>
+    ## 2    Europe     Albania <tibble [12 × 4]>
+    ## 3    Africa     Algeria <tibble [12 × 4]>
+    ## 4    Africa      Angola <tibble [12 × 4]>
+    ## 5  Americas   Argentina <tibble [12 × 4]>
+
+``` r
+gLmMut <- gNFilt %>%
+  mutate(Lm = map(gNFilt$data, leYr))
+
+gLmMut
+```
+
+    ## # A tibble: 5 × 4
+    ##   continent     country              data       Lm
+    ##      <fctr>      <fctr>            <list>   <list>
+    ## 1      Asia Afghanistan <tibble [12 × 4]> <S3: lm>
+    ## 2    Europe     Albania <tibble [12 × 4]> <S3: lm>
+    ## 3    Africa     Algeria <tibble [12 × 4]> <S3: lm>
+    ## 4    Africa      Angola <tibble [12 × 4]> <S3: lm>
+    ## 5  Americas   Argentina <tibble [12 × 4]> <S3: lm>
+
+**Note:** Notice the `=` in the `mutate` argument instead of `<-`. This names the new column `Lm` instead of `Lm <- map(gNFilt$data, leYr)`. In other uses, `<-` for simply assigning a vector (rather than a column) would suffice.
+
+-   `tidy()` : Turns a list into a tidy dataframe type object.
+-   `unnest()` : Opposite of `nest()`. Expands a df/list-column type object to fill tidy up a previously nested df (i.e. one observation per column).
+
+``` r
+str(gLmMut$Lm[[3]]) # list
+```
+
+    ## List of 12
+    ##  $ coefficients : Named num [1:2] 42.236 0.569
+    ##   ..- attr(*, "names")= chr [1:2] "(Intercept)" "I(year - 1950)"
+    ##  $ residuals    : Named num [1:12] -0.298 -0.536 -0.765 -0.507 -0.243 ...
+    ##   ..- attr(*, "names")= chr [1:12] "1" "2" "3" "4" ...
+    ##  $ effects      : Named num [1:12] -204.486 34.038 -0.628 -0.401 -0.168 ...
+    ##   ..- attr(*, "names")= chr [1:12] "(Intercept)" "I(year - 1950)" "" "" ...
+    ##  $ rank         : int 2
+    ##  $ fitted.values: Named num [1:12] 43.4 46.2 49.1 51.9 54.8 ...
+    ##   ..- attr(*, "names")= chr [1:12] "1" "2" "3" "4" ...
+    ##  $ assign       : int [1:2] 0 1
+    ##  $ qr           :List of 5
+    ##   ..$ qr   : num [1:12, 1:2] -3.464 0.289 0.289 0.289 0.289 ...
+    ##   .. ..- attr(*, "dimnames")=List of 2
+    ##   .. .. ..$ : chr [1:12] "1" "2" "3" "4" ...
+    ##   .. .. ..$ : chr [1:2] "(Intercept)" "I(year - 1950)"
+    ##   .. ..- attr(*, "assign")= int [1:2] 0 1
+    ##   ..$ qraux: num [1:2] 1.29 1.27
+    ##   ..$ pivot: int [1:2] 1 2
+    ##   ..$ tol  : num 1e-07
+    ##   ..$ rank : int 2
+    ##   ..- attr(*, "class")= chr "qr"
+    ##  $ df.residual  : int 10
+    ##  $ xlevels      : Named list()
+    ##  $ call         : language lm(formula = lifeExp ~ I(year - 1950), data = df)
+    ##  $ terms        :Classes 'terms', 'formula'  language lifeExp ~ I(year - 1950)
+    ##   .. ..- attr(*, "variables")= language list(lifeExp, I(year - 1950))
+    ##   .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+    ##   .. .. ..- attr(*, "dimnames")=List of 2
+    ##   .. .. .. ..$ : chr [1:2] "lifeExp" "I(year - 1950)"
+    ##   .. .. .. ..$ : chr "I(year - 1950)"
+    ##   .. ..- attr(*, "term.labels")= chr "I(year - 1950)"
+    ##   .. ..- attr(*, "order")= int 1
+    ##   .. ..- attr(*, "intercept")= int 1
+    ##   .. ..- attr(*, "response")= int 1
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x000000001688b738> 
+    ##   .. ..- attr(*, "predvars")= language list(lifeExp, I(year - 1950))
+    ##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+    ##   .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - 1950)"
+    ##  $ model        :'data.frame':   12 obs. of  2 variables:
+    ##   ..$ lifeExp       : num [1:12] 43.1 45.7 48.3 51.4 54.5 ...
+    ##   ..$ I(year - 1950):Class 'AsIs'  num [1:12] 2 7 12 17 22 27 32 37 42 47 ...
+    ##   ..- attr(*, "terms")=Classes 'terms', 'formula'  language lifeExp ~ I(year - 1950)
+    ##   .. .. ..- attr(*, "variables")= language list(lifeExp, I(year - 1950))
+    ##   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+    ##   .. .. .. ..- attr(*, "dimnames")=List of 2
+    ##   .. .. .. .. ..$ : chr [1:2] "lifeExp" "I(year - 1950)"
+    ##   .. .. .. .. ..$ : chr "I(year - 1950)"
+    ##   .. .. ..- attr(*, "term.labels")= chr "I(year - 1950)"
+    ##   .. .. ..- attr(*, "order")= int 1
+    ##   .. .. ..- attr(*, "intercept")= int 1
+    ##   .. .. ..- attr(*, "response")= int 1
+    ##   .. .. ..- attr(*, ".Environment")=<environment: 0x000000001688b738> 
+    ##   .. .. ..- attr(*, "predvars")= language list(lifeExp, I(year - 1950))
+    ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+    ##   .. .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - 1950)"
+    ##  - attr(*, "class")= chr "lm"
+
+``` r
+str(gLmMut$data[[3]]) # tbl_df, df, tbl
+```
+
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    12 obs. of  4 variables:
+    ##  $ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+    ##  $ lifeExp  : num  43.1 45.7 48.3 51.4 54.5 ...
+    ##  $ pop      : int  9279525 10270856 11000948 12760499 14760787 17152804 20033753 23254956 26298373 29072015 ...
+    ##  $ gdpPercap: num  2449 3014 2551 3247 4183 ...
+
+``` r
+typeof(gLmMut$data[[3]]) # list
+```
+
+    ## [1] "list"
+
+``` r
+tidyFrame <- tidy(gLmMut$Lm[[3]]) #df
+
+gFiltCoef <- gLmMut %>%
+  select(continent, country, Lm) %>% 
+  unnest(map(Lm, tidy))
+
+gFiltCoef
+```
+
+    ## # A tibble: 10 × 7
+    ##    continent     country           term   estimate   std.error  statistic
+    ##       <fctr>      <fctr>          <chr>      <dbl>       <dbl>      <dbl>
+    ## 1       Asia Afghanistan    (Intercept) 29.3566375 0.698981278  41.999176
+    ## 2       Asia Afghanistan I(year - 1950)  0.2753287 0.020450934  13.462890
+    ## 3     Europe     Albania    (Intercept) 58.5597618 1.133575812  51.659325
+    ## 4     Europe     Albania I(year - 1950)  0.3346832 0.033166387  10.091036
+    ## 5     Africa     Algeria    (Intercept) 42.2364149 0.756269040  55.848399
+    ## 6     Africa     Algeria I(year - 1950)  0.5692797 0.022127070  25.727749
+    ## 7     Africa      Angola    (Intercept) 31.7079741 0.804287463  39.423683
+    ## 8     Africa      Angola I(year - 1950)  0.2093399 0.023532003   8.895964
+    ## 9   Americas   Argentina    (Intercept) 62.2250191 0.167091314 372.401279
+    ## 10  Americas   Argentina I(year - 1950)  0.2317084 0.004888791  47.395847
+    ## # ... with 1 more variables: p.value <dbl>
+
+-   `` col = recode(col, `{old_value}` = "new_value", ...) `` : Changes a value in the given column into another value. Works for factor, character and numeric values. See `?dplyr::recode` for a lot more.
+-   If an inline code block has a `` `this` `` thing in it, use ``` `` ``` to begin and end the code block.
+
+``` r
+gFiltCoef %>%
+  mutate(term = recode(term, `(Intercept)` = "intercept", `I(year - 1950)` = "slope"))
+```
+
+    ## # A tibble: 10 × 7
+    ##    continent     country      term   estimate   std.error  statistic
+    ##       <fctr>      <fctr>     <chr>      <dbl>       <dbl>      <dbl>
+    ## 1       Asia Afghanistan intercept 29.3566375 0.698981278  41.999176
+    ## 2       Asia Afghanistan     slope  0.2753287 0.020450934  13.462890
+    ## 3     Europe     Albania intercept 58.5597618 1.133575812  51.659325
+    ## 4     Europe     Albania     slope  0.3346832 0.033166387  10.091036
+    ## 5     Africa     Algeria intercept 42.2364149 0.756269040  55.848399
+    ## 6     Africa     Algeria     slope  0.5692797 0.022127070  25.727749
+    ## 7     Africa      Angola intercept 31.7079741 0.804287463  39.423683
+    ## 8     Africa      Angola     slope  0.2093399 0.023532003   8.895964
+    ## 9   Americas   Argentina intercept 62.2250191 0.167091314 372.401279
+    ## 10  Americas   Argentina     slope  0.2317084 0.004888791  47.395847
+    ## # ... with 1 more variables: p.value <dbl>

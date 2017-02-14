@@ -9,6 +9,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 library(gapminder)
 library(tidyverse)
+library(broom)
 g <- gapminder
 ```
 
@@ -17,6 +18,8 @@ g <- gapminder
 Fig 1: R Object type cheat table
 
 # Summary:
+
+### Operations for a single dataset
 
 * tidyverse and gapminder are awesome and thought provoking!
 * `str(obj)` : shows the structure of an R object.
@@ -41,7 +44,7 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 * `rename(df, NewColName = old_col_name)` : Rename columns. 
 * `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 * `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
-* `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe.
+* `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe. Use `select(x:y)` to filter all columns between and including x, but not y.
 * `mutate(df, new var/col = func)` : defines and inserts new column into the dataframe.
 * Percentages and relative quantities hold much more meaning to humans than simply raw numbers.
 * `rep(thing, x)` : Replicates (repeats) thing x times.
@@ -133,6 +136,9 @@ g %>%
   print(n=Inf)
 ```
 
+
+### Split-Apply-Combine Operations for a single dataset
+
 * `data = {bla}`: Used as an argument in many functions to define and/or filter the data to be used for the analysis. use `.` to include all data. Can also be fed a `subset()` function to filter the data in compute time as an alternative to using multiple piping operators. **Note:** `select()` may not be useful here.
 ``` {r data}
 g %>%
@@ -142,4 +148,61 @@ g %>%
 t.test(gdpPercap ~ country, data = subset(g, continent == "Oceania"))
 ```
 
+* `nest()` : Collapses the non-grouping variables into a list-column type variable for further analysis.
+* `df[row, col]` : Returns the specified component of the given data frame. Blank arguments give entire rows or columns. Names or numbers can be used.
+* `df$col[row_number]` : Returns the value/s in the specified place.
+``` {r nest_1}
+gNested <- g %>%
+   group_by(continent, country) %>% 
+   nest()
+
+gNested[132,]
+gNested$data[132]
+```
+
+* `lm(var1 ~ var2, data = {bla})` : Fits a linear regression model over the given data. `I(var2 - {<smallest value})` denotes the x-axis values and helps set the y-intercept close to the lowest y-axis data value (and not intrapolate values).
+
+``` {r}
+leYr <- function(df) {
+  lm(lifeExp ~ I(year - 1950), data = df)
+}
+
+leYr(gNested[[132, "data"]])
+```
+**Notice** the double square brackets? I have no idea why they exist...
+
+* `map(data, func)` : Applies the given function to the specified data.
+``` {r map}
+gNFilt <- gNested[1:5,]
+
+gNFilt
+  
+gLmMut <- gNFilt %>%
+  mutate(Lm = map(gNFilt$data, leYr))
+
+gLmMut
+```
+**Note:** Notice the `=` in the `mutate` argument instead of `<-`. This names the new column `Lm` instead of `Lm <- map(gNFilt$data, leYr)`. In other uses, `<-` for simply assigning a vector (rather than a column) would suffice.
+
+* `tidy()` : Turns a list into a tidy dataframe type object.
+* `unnest()` : Opposite of `nest()`. Expands a df/list-column type object to fill tidy up a previously nested df (i.e. one observation per column).
+``` {r de_nest}
+str(gLmMut$Lm[[3]]) # list
+str(gLmMut$data[[3]]) # tbl_df, df, tbl
+typeof(gLmMut$data[[3]]) # list
+tidyFrame <- tidy(gLmMut$Lm[[3]]) #df
+
+gFiltCoef <- gLmMut %>%
+  select(continent, country, Lm) %>% 
+  unnest(map(Lm, tidy))
+
+gFiltCoef
+```
+
+* ``col = recode(col, `{old_value}` = "new_value", ...)`` : Changes a value in the given column into another value. Works for factor, character and numeric values. See `?dplyr::recode` for a lot more.
+* If an inline code block has a `` `this` `` thing in it, use ` `` ` to begin and end the code block.
+``` {r recode}
+gFiltCoef %>%
+  mutate(term = recode(term, `(Intercept)` = "intercept", `I(year - 1950)` = "slope"))
+```
 
