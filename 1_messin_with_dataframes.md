@@ -27,7 +27,7 @@ str(gapminder)
     ##  $ pop      : int  8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
     ##  $ gdpPercap: num  779 821 853 836 740 ...
 
--   `names(df)` : gives the column names (variables) of a dataframe. Similarly, `ncol()` is equaivalent to `length()`. `nrow()` and `dim()` give number of rows and row x col dimensions of the dataframe.
+-   `names(list)` : Used for naming the different columns for list objects including data frames. Similarly, `ncol()` is equaivalent to `length()`. `nrow()` and `dim()` give number of rows and row x col dimensions of the dataframe.
 -   `as_tibble(df)` : a much nicer summary of large dataframes.
 
 ``` r
@@ -63,7 +63,7 @@ boxplot(gdpPercap~year, g, main="Worldwide GDP Per Capita distribution in 55 yea
 -   `rename(df, NewColName = old_col_name)` : Rename columns.
 -   `filter(df, col {operator} value)` : filters dataframe for the condition in the second argument. Can add more arguments if multiple filter conditions needed. `{operator}` can be `==`, `>=`, `<`, `!=`, `%in%` and the like.
 -   `x %in% y`: asks if x is contained in y. Not to be confused with `==` or `=`.
--   `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe. Use `select(x:y)` to filter all columns between and including x, but not y.
+-   `select(df, col/condition)` : Ditto `filter()`, with the added ability to subset a dataframe with only certain columns/variables. Use `select(df, col/var, everything())` to bring a variable the left side of the dataframe. `everything()` without a preceding column name `selects` the entire dataframe. Use `select(x:y)` to filter all columns between and including x, but not y. Use `select(-x, -y)` to select everything but columns x and y.
 -   `mutate(df, new var/col = func)` : defines and inserts new column into the dataframe.
 -   Percentages and relative quantities hold much more meaning to humans than simply raw numbers.
 -   `rep(thing, x)` : Replicates (repeats) thing x times.
@@ -447,7 +447,7 @@ str(gLmMut$Lm[[3]]) # list
     ##   .. ..- attr(*, "order")= int 1
     ##   .. ..- attr(*, "intercept")= int 1
     ##   .. ..- attr(*, "response")= int 1
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x000000001688b738> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x000000001859b348> 
     ##   .. ..- attr(*, "predvars")= language list(lifeExp, I(year - 1950))
     ##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
     ##   .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - 1950)"
@@ -464,7 +464,7 @@ str(gLmMut$Lm[[3]]) # list
     ##   .. .. ..- attr(*, "order")= int 1
     ##   .. .. ..- attr(*, "intercept")= int 1
     ##   .. .. ..- attr(*, "response")= int 1
-    ##   .. .. ..- attr(*, ".Environment")=<environment: 0x000000001688b738> 
+    ##   .. .. ..- attr(*, ".Environment")=<environment: 0x000000001859b348> 
     ##   .. .. ..- attr(*, "predvars")= language list(lifeExp, I(year - 1950))
     ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
     ##   .. .. .. ..- attr(*, "names")= chr [1:2] "lifeExp" "I(year - 1950)"

@@ -1,0 +1,113 @@
+---
+title: "An Ode to the Pirate Language"
+author: "Vivek Trivedi"
+date: "16 February 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gapminder)
+library(tidyverse)
+```
+
+# Summary:
+
+* By default, all R objects and most operations are vectors unless actively specified/manipulated. 
+* Use square brackets to mess around with each value within the vector (Indexing).
+* Vectors with same flavour of objects (chr, num, logical etc.) are called atomic vectors. R will try to keep all vectors atomic by converting all values of the vector to the "lowest common denominator" flavour, generally character. Be careful, especially because this doesn't always throw up errors until it's too late (#noragrets).
+* logical = TRUE and FALSE. numeric: numbers, integers and double-precision floating point numbers. character = ABCs and stuff.
+``` {r vector}
+x <- 3 * 4 # x <- 12
+
+x[3] <- 9 # x <- c(12, NA, 9)
+
+str(x) # num with 3 values
+
+x[5]
+
+y <- x^pi
+
+y
+
+# Same as this convoluted thing:
+# 
+# z <- vector(mode = mode(x), length = length(x))
+# for(i in seq_along(x)) {
+#   z[i] <- x[i]^2
+# }
+# 
+# yay!
+
+x[2] <- "bla" 
+
+length(x)
+
+str(x)
+
+z <- runif(5)
+
+str(z)
+
+is.character(z) # FALSE
+
+names(z) <- letters[seq_along(z)] # Gives assigns smaller case letters to each value in the specified vector.
+
+z
+
+z < 0.5 # logical vector
+
+as.numeric(z < 0.5) # FALSE = 0, TRUE = 1
+
+# is.bla() and as.bla() work for other flavours too (with varying success).
+
+round(rnorm(5, mean = 10^(1:5))) # waaaattttt?!
+```
+**Note:** The funny business around the ability for R to take in vectors where intuitively there should not be vectors is something to be wary of. 
+
+* If you want vectors that are non-atomic and don't devolve into the "lowest common denominator" flavour, you want lists. Dataframes are lists. Many functions return lists for ease of extraction and analysis.
+* Putting a set of smooth circular brackets around a function seems to display the result of the function.
+* Putting single square brackets around an index number provides the contents of the cell/s as a list. Putting double square brackets around them gives the actual contents of the cell/s. 
+``` {r list}
+(a <- list("cabbage", pi, TRUE, 4.3))
+
+names(a) <- c("veg", "irr_num", "Boolean", "number")
+
+# OR OR OR...
+
+b <- list(
+  veg = "cabbage",
+  irr_num = pi, 
+  Boolean = TRUE, 
+  number = 4.3)
+
+identical(a,b) # TRUE.
+
+# Personally, I'd prefer b as I don't need to write double quotes as often.
+
+length(a) # 4
+
+a$veg[2] = "broccolli" # both = or <- work, == doesn't
+
+length(a) # still 4, not 5...
+
+class(a)
+
+mode(a)
+
+str(a)
+
+a[1] # type list
+
+a[[1]] # type character
+
+# Group names can also be used to get the contents instead of 
+# the group index numbers. Same square bracket logic applies. 
+
+a[["veg"]]
+
+a[c("veg", "Boolean")] # works, returns a list of 2 lists! 
+# However, double square brackets don't work for more than one name/index.
+```
+
+* 

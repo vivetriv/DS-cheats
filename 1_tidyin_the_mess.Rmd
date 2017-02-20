@@ -8,6 +8,8 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(gapminder)
+g <- gapminder
 ```
 # Summary
 * R is a data-aware language. It instrinsically knows the structure of data.
@@ -117,4 +119,29 @@ semi_join(publishers, superheroes)
 * `anti_join(df1, df2)` : df1 - (df1 intersect df2), but only with the columns of df1. If a row in df1 has a matching value in df2, it will be filtered out of the results. Opposite of `semi_join()`.
 ``` {r anti-join}
 anti_join(superheroes, publishers)
+```
+
+* `tibble(col1 = {bla}, col2 = {blabla}...)` : creates a tibble data frame with each argument and its equivalent defining the columns. Use `tribble()` to enter data by rows.
+* `droplevels()` : Drops all unused levels from a tbl_df. No idea why it's really necessary...
+``` {r tribble}
+lookupDf <- tibble(country = c("Belgium", "India", "United States", "Canada"), food = c("waffle", "Tikka", "Twinkie", "poutine"))
+
+# OR OR OR...
+
+lookupDf <- tribble(
+  ~ country, ~food,
+  "Belgium",  "waffle",
+  "India", "Tikka",
+  "United States", "Twinkie",
+  "Canada", "poutine"
+)
+
+# Just for fun...
+
+lookupGm <- g %>%
+  filter(country %in% c("Belgium", "India", "United States", "Canada", "Malawi"), year > 2003) %>%
+  select(-pop, -gdpPercap) %>%
+  droplevels()
+
+str(lookupGm)
 ```

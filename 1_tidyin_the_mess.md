@@ -271,3 +271,36 @@ anti_join(superheroes, publishers)
     ##      name alignment gender         publisher
     ##     <chr>     <chr>  <chr>             <chr>
     ## 1 Hellboy      good   male Dark Horse Comics
+
+-   `tibble(col1 = {bla}, col2 = {blabla}...)` : creates a tibble data frame with each argument and its equivalent defining the columns. Use `tribble()` to enter data by rows.
+
+``` r
+lookupDf <- tibble(country = c("Belgium", "India", "United States", "Canada"), food = c("waffle", "Tikka", "Twinkie", "poutine"))
+
+# OR OR OR...
+
+lookupDf <- tribble(
+  ~ country, ~food,
+  "Belgium",  "waffle",
+  "India", "Tikka",
+  "United States", "Twinkie",
+  "Canada", "poutine"
+)
+
+# Just for fun...
+
+lookupGm <- g %>%
+  filter(country %in% c("Belgium", "India", "United States", "Canada", "Malawi"), year > 2003) %>%
+  select(-pop, -gdpPercap)
+
+as_tibble(lookupGm)
+```
+
+    ## # A tibble: 5 × 4
+    ##         country continent  year lifeExp
+    ##          <fctr>    <fctr> <int>   <dbl>
+    ## 1       Belgium    Europe  2007  79.441
+    ## 2        Canada  Americas  2007  80.653
+    ## 3         India      Asia  2007  64.698
+    ## 4        Malawi    Africa  2007  48.303
+    ## 5 United States  Americas  2007  78.242
