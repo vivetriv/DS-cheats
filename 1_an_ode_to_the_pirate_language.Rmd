@@ -13,6 +13,8 @@ library(tidyverse)
 
 # Summary:
 
+### Vectors
+
 * By default, all R objects and most operations are vectors unless actively specified/manipulated. 
 * Use square brackets to mess around with each value within the vector (Indexing).
 * Vectors with same flavour of objects (chr, num, logical etc.) are called atomic vectors. R will try to keep all vectors atomic by converting all values of the vector to the "lowest common denominator" flavour, generally character. Be careful, especially because this doesn't always throw up errors until it's too late (#noragrets).
@@ -51,7 +53,8 @@ str(z)
 
 is.character(z) # FALSE
 
-names(z) <- letters[seq_along(z)] # Gives assigns smaller case letters to each value in the specified vector.
+names(z) <- letters[seq_along(z)] # Gives assigns smaller case letters 
+# to each value in the specified vector.
 
 z
 
@@ -65,9 +68,13 @@ round(rnorm(5, mean = 10^(1:5))) # waaaattttt?!
 ```
 **Note:** The funny business around the ability for R to take in vectors where intuitively there should not be vectors is something to be wary of. 
 
+---
+
+### Lists
+
 * If you want vectors that are non-atomic and don't devolve into the "lowest common denominator" flavour, you want lists. Dataframes are lists. Many functions return lists for ease of extraction and analysis.
 * Putting a set of smooth circular brackets around a function seems to display the result of the function.
-* Putting single square brackets around an index number provides the contents of the cell/s as a list. Putting double square brackets around them gives the actual contents of the cell/s. 
+* Putting single square brackets around an index number provides the contents of the cell/s as a list. Putting double square brackets around them gives the actual contents of the cell/s. All the rest of the stuff about lists applies to data frames as well.
 ``` {r list}
 (a <- list("cabbage", pi, TRUE, 4.3))
 
@@ -101,13 +108,82 @@ a[1] # type list
 
 a[[1]] # type character
 
-# Group names can also be used to get the contents instead of 
-# the group index numbers. Same square bracket logic applies. 
+# Group names can also be used to get the contents instead of the group index numbers. Same square bracket logic applies. 
 
 a[["veg"]]
 
-a[c("veg", "Boolean")] # works, returns a list of 2 lists! 
-# However, double square brackets don't work for more than one name/index.
+a[c("veg", "Boolean")] # works, returns a list of 2 lists! However, double square brackets don't work for more than one name/index.
+
+length(a["veg"]) # 1, not 2...
+
+length(a["veg"][[1]]) # To get the qualities of the actual vector itself, rather than a list comprised of it.
 ```
 
-* 
+* Character values under a column in data frames by default are converted to factor levels. To prevent this, use `I()`. aka Class 'AsIs'.
+``` {r I}
+demodf <- data.frame(
+  x = letters[1:3],
+  y = I(letters[1:3]),
+  z = 1:3 # Use equals sign for column value assignment. <- does something weird.
+  )
+
+str(demodf)
+```
+
+* If each column/variables don't have the same langth, `as.data.frame()` won't work on lists. There are ways, however.
+
+---
+
+### Matrices
+
+* Matrices are atomic vectors in two dimensions.
+* Indexing in matrices works very similarly to lists. Some interesting exceptions are given below.
+``` {r matrices}
+matrix(LETTERS[1:25], nrow = 5) # Use byrow = TRUE argument for doing sequentially by the row.
+
+matrix("bla", nrow = 2, ncol = 5)
+
+matrix(c("yo!", "foo?"), nrow = 3, ncol = 2) # Throws up soft error if total number of matrix elements is not a multiple of the total number of data values. Also, none of the two data elements are next to themselves in the matrix.
+
+matrix(c("yo!", "foo?", "bla"), nrow = 6, ncol = 6) # If nrow is a multiple of the number of data elements, each row will have the same data element. Otherwise, as before.
+
+vecDat <- data.frame(vec1 = 5:1,
+                     vec2 = 2^(1:5))
+vecMat <- as.matrix(vecDat)
+
+str(vecMat) # Reminder: column names don't automatically turn into factors.
+
+matrix(1:15, nrow = 5,
+       dimnames = list(paste0("row", 1:5),
+                       paste0("col", 1:3))) 
+#Use dimnames (with lists) for naming rows and columns in                                              that order.
+
+# OR OR OR...
+
+col1 <- row1 <- 1:5
+col2 <- row2 <- 6:10
+col3 <- row3 <- 11:15
+cbind(col1, col2, col3)
+
+# OR...
+
+Mtx <- rbind(row1, row2, row3)
+colnames(Mtx) <- paste0("col", seq_len(ncol(Mtx))) # dimnames() can also be used.
+
+Mtx
+
+Mtx[ , 3]
+
+Mtx[,3, drop = FALSE] # Doesn't get rid of seemingly obvious information (like column name of the 3rd column)
+
+Mtx[5] # Single index number without commas give the values in cell number going from top to bottom in columns, from left to right. In lists, this gives values from row 5.
+
+Mtx[c("row1", "row3"), c("col2", "col3")] # This...
+
+Mtx[-c(2, 3), c(TRUE, TRUE, FALSE, FALSE), drop = FALSE] # Wot the... Also, notice the 5th column shows up - the default must be TRUE.
+
+Mtx["row1", 1:3] <- c("I", "LUV", "SKITTLES!")
+
+Mtx
+
+```
