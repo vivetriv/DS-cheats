@@ -273,6 +273,7 @@ anti_join(superheroes, publishers)
     ## 1 Hellboy      good   male Dark Horse Comics
 
 -   `tibble(col1 = {bla}, col2 = {blabla}...)` : creates a tibble data frame with each argument and its equivalent defining the columns. Use `tribble()` to enter data by rows.
+-   `droplevels()` : `forcats::fct_drop()` preferred. Drops all unused levels from a tbl\_df. This makes memory management and plotting a bit easier - the unused factor levels get carried around for no reason (and mess up plotting with massive legends).
 
 ``` r
 lookupDf <- tibble(country = c("Belgium", "India", "United States", "Canada"), food = c("waffle", "Tikka", "Twinkie", "poutine"))
@@ -291,16 +292,67 @@ lookupDf <- tribble(
 
 lookupGm <- g %>%
   filter(country %in% c("Belgium", "India", "United States", "Canada", "Malawi"), year > 2003) %>%
-  select(-pop, -gdpPercap)
+  select(-pop, -gdpPercap) %>%
+  droplevels()
 
-as_tibble(lookupGm)
+str(lookupGm)
 ```
 
-    ## # A tibble: 5 × 4
-    ##         country continent  year lifeExp
-    ##          <fctr>    <fctr> <int>   <dbl>
-    ## 1       Belgium    Europe  2007  79.441
-    ## 2        Canada  Americas  2007  80.653
-    ## 3         India      Asia  2007  64.698
-    ## 4        Malawi    Africa  2007  48.303
-    ## 5 United States  Americas  2007  78.242
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    5 obs. of  4 variables:
+    ##  $ country  : Factor w/ 5 levels "Belgium","Canada",..: 1 2 3 4 5
+    ##  $ continent: Factor w/ 4 levels "Africa","Americas",..: 4 2 3 1 2
+    ##  $ year     : int  2007 2007 2007 2007 2007
+    ##  $ lifeExp  : num  79.4 80.7 64.7 48.3 78.2
+
+------------------------------------------------------------------------
+
+### Factors
+
+-   Load forcats separately and along with `tidyverse`.
+-   R will try its best to turn every character column into a factor. Use `stringsasFactors = FALSE` to prevent this in `read.table()` or `data.frame()`; or use `read_bla()` and `tibble()` functions.
+-   There is no (great) substitute for vigilance in this regard. Packages in the `tidyverse` do not convert stuff to factors automatically [Source](http://forcats.tidyverse.org/).
+-   `fct_infreq()` : Arranges the data frame according to the order of frequency of a certain factor level.
+-   `fct_rev()` : Reverses the order of factors in a data frame.
+
+``` r
+g$continent %>% 
+  fct_infreq() %>%
+  levels() # Ordering by frequency of observations under a factor level (ascending order)
+```
+
+    ## [1] "Africa"   "Asia"     "Europe"   "Americas" "Oceania"
+
+``` r
+g$continent %>% 
+  fct_infreq() %>%
+  fct_rev() %>%
+  levels() # Ordering by frequency of observations under a factor level (descending order)
+```
+
+    ## [1] "Oceania"  "Americas" "Europe"   "Asia"     "Africa"
+
+-   `fct_reorder(factor, var, quality...)` : Arranges the factor according to a quality of the given variable. `quality` can be `min`, `max`, `.desc = TRUE` for descending order, or nothing (default is median). Makes scatterplots look more impactful when used on non-temporal categorical variables. `fct_reorder2()` is a different function used with ggplot2.
+-   `fct_relevel(factor, "lvl1", "lvl2"...)` : Keeps the factor ordering the same as before, except bringing the specified arguments to the start of the factor.
+-   `fct_recode(factor, "newLevel" = "oldLevel"...)` : Renames individual factor levels.
+
+``` r
+fct_reorder(g$country, g$lifeExp, .desc= TRUE) %>% 
+  levels() %>%
+  head() # Greatest to lowest life expectancy. Uses median values of lifeExp within the factor levels to sort them.
+```
+
+    ## [1] "Iceland"     "Japan"       "Sweden"      "Switzerland" "Netherlands"
+    ## [6] "Norway"
+
+``` r
+g$country %>% fct_relevel("Romania", "Haiti") %>% levels() %>% head()
+```
+
+    ## [1] "Romania"     "Haiti"       "Afghanistan" "Albania"     "Algeria"    
+    ## [6] "Angola"
+
+``` r
+g$country %>% fct_recode("AFG" = "Afghanistan", "ALB" = "Albania") %>% levels() %>% head()
+```
+
+    ## [1] "AFG"       "ALB"       "Algeria"   "Angola"    "Argentina" "Australia"
