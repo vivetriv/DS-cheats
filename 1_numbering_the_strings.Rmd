@@ -1,0 +1,124 @@
+---
+title: "Numbering the strings"
+author: "Vivek Trivedi"
+date: "26 February 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringr)
+```
+
+# Summary
+
+### Not regex
+
+* Use `tidyverse` and `stringr` for messing with strings.
+* Massive topic, see the [Resources](http://stat545.com/block028_character-data.html#resources) if a problem occurs. 
+* `fruit`, `words`, and `sentences` are prebuilt datasets within `stringr`.
+* `str_detect(vector, "str")` : Answers the condition of the object or an element of the object contains the given string, discretely by itself or within a larger element. Also works for regex.
+* `append(vector, new_element)` : Adds new elements to a vector.
+* `str_subset(vector, "str")` : Similar to `str_detect()`, except this command also produces a new factor with the elements of the given vectors that match the specified condition.
+``` {r str-detect}
+fruit # chr vector
+
+index <- NULL
+item <- NULL
+
+for (n in 1:length(fruit)) {
+  if (str_detect(fruit[n], "fruit") == TRUE) {
+    index <- append(index, n)
+    item <- append(item, fruit[n])
+  }
+}
+
+(fru <- tibble(index, item))
+
+# OR OR OR...
+
+(fru2 <- str_subset(fruit, "fruit")) # It would be nice to have indices though.
+```
+
+* `str_split(vector, "delimiter")` : Outputs a list of elements of a vector split by the given delimiter. Often the delimiter is space, tab, comma, etc. 
+* `str_split_fixed(vector, "delimiter" n = num)` : Outputs a length(vector) x num matrix of elements split by the given delimiter. 
+* `separate(tbl_df, col, into = c("col1, col2"), sep = "bla")` : Same as `str_split()`, but works on data frames instead of vectors. Produces a tidy data frame with the given column names. **Note:** `into` argument needs to be supplied. It has no default.
+``` {r splitting}
+str_split(fru2, " ") # class list
+str_split_fixed(fru2, " ", n = 3) # class matrix
+separate(fru, item, c("x" , "fruit"), " ") # class tbl_df
+```
+
+* `str_length(vector)` : Gives the length of strings within a vector.
+* `str_sub(vector, start_pos, end_pos)` : Output substrings including and in between the given character positions of the vector elements. Sliding windows and assignments are also possible (with caveats). Also see `str_replace()`.
+``` {r length&sub}
+str_length(fru2) # vector
+str_sub(fru2, 4, ) # vector
+str_sub(fru2, 1:6, 3:8) # vector
+fru3 <- fru2
+mehfruit <- str_sub(fru3, 1, 4) <- "meh" 
+mehfruit # Not how it works...
+# Only works this way...
+str_sub(fru3, 1, 4) <- "meh"
+fru3 # vector
+```
+
+* `str_c(vector_elements1, vector_elements2, sep = "bli", collapse = "bla")` : Useful little thing that can concantenate strings in a vector into larger strings. Opposite of `str_split()` and `separate()`.
+* `unite(tbl_df, "new_col", col1, col2..., sep = " or ")`: Combines two character-type tibble columns into a single column with a combiner string.  
+``` {r concantenate-collapse}
+str_c(fru2[1:4], fru2[5:8], sep = " or may be ")
+str_c(fru2, collapse = ", ")
+str_c(fru2[1:4], fru2[5:8], sep = " or may be ", collapse = ", ")
+fruco <- tibble(fruit1 = fru$item[1:4], fruit2 = fru$item[5:8]) # unite() doesn't like col arguments with indices, therefore, simplifying column names is necessary.
+fruco %>%
+   unite("fruits", fruit1, fruit2, sep = " & then ")
+```
+
+* `str_replace(vector, "replacee", "replacer")` : Replaces a substring with another string. `str_replace_na()` variant exists.
+* `replace_na(tbl_df, replace = list(col = "replacer"))` : Replaces `NA` values in a tibble with the replacer string.
+``` {r replace} 
+fru21 <- fru
+str_replace(fru21$item, "uit", "actal")
+fru21$item[3] <- NA # NULL doesn't work for some reason...
+fru21$item
+str_replace_na(fru21$item, "It works") # returns vector.
+replace_na(fru21, replace = list(item = "NADA")) # returns data frame.
+```
+
+---
+
+### Regex
+
+* It's like learning a new language no one even likes to speak or read...
+* When strings cannot be called upon using another fixed string (e.g.: `str_replace(fru, "fruit", "vege")`), regular expressions become useful, as they deal with character patterns within strings.
+* Regex go between quoation marks.
+* When using `\`, make sure to put an extra `\` to escape the stringification of stuff between quotation marks. Double square brackets around `:bla:` for the same reason. 
+
+Regex|  Meaning
+-----|----------
+`.`  | a single character
+`\n` | new line
+`^`  | beginning of string
+`$`  | end of string
+`\b` | word boundary
+`\B` | not word boundary
+`\d` | single digit
+`/s` | space aka `[:space:]`
+`[bla]` | character class
+`[^bla]` | not bla chr class
+`[:punct:]` | Punctuation
+`*` | 0 or more
+`+` | 1 or more
+`?` | 0 or 1
+`{n}` | Exactly n
+`{n,}` | at least n
+`{,m}` | Up to m
+`{n,m}` | Between and including n and m
+
+
+
+``` {r regex}
+
+```
+
