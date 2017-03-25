@@ -21,7 +21,7 @@ g <- gapminder
 ---
 
 ### Operations for similar data frames
-* `read_csv(file.path(path/to/file))`: Imports csv files into the workspace. Other `read` variants [also exist](https://github.com/tidyverse/readr). `read_csv(chrDataFrame, trim_ws = TRUE, skip = 1)` can extract comma separated data from a character type object into a tibble/data frame.
+* `read_csv(file.path(path/to/file))`: Imports csv files into the workspace. Other `read` variants [also exist](https://github.com/tidyverse/readr). `read_csv(chrDataFrame, trim_ws = TRUE, skip = 1)` can extract comma separated data from a character type object into a tibble/data frame. For the `file.path` argument, make sure to use forward slash `/` instead of `\`.
 ``` {r import, message = FALSE}
 # library(tidyverse)
 males <- read_csv(file.path("males.csv"))
